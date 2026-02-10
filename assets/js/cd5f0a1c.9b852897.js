@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkvpn_docs_api=globalThis.webpackChunkvpn_docs_api||[]).push([[926],{9842(a){a.exports=JSON.parse('{"metadata":{"permalink":"/VPN_API/blog","page":1,"postsPerPage":10,"totalPages":1,"totalCount":4,"blogDescription":"Blog","blogTitle":"Blog"}}')}}]);
