@@ -63,3 +63,39 @@ sidebar_position: 1
 | ``phone`` |  String  | 否  | 手机号（中国大陆 11 位），用于找回/风控  |
 | ``promo_code`` |  String  | 否  | 推广码，用于延长试用期  |
 | ``gdpr_consent`` |  boolean  | 条件必填  | EU 地区用户必须为 `true`|
+
+**参数校验备注**
+
+* `username` 当前 **不支持下划线和特殊字符**。（历史兼容性原因）
+* `email` 需通过标准 RFC 校验。
+* `password` 校验在服务端完成，**客户端不要写死规则**。
+* 是否属于 EU 用户由 **IP Geo + 账单地区** 综合判断。（IP 可能存在误判）
+
+## 4. 成功返回
+
+```json
+{
+  "code": 200,
+  "message": "Register success",
+  "data": {
+    "userId": "u_987654321",
+    "createdAt": "2026-02-04T10:30:00Z",
+    "trialExpiresAt": "2026-02-10T10:30:00Z",
+    "configProfileId": "trial_profile_001",
+    "nextStep": "NONE"
+  },
+  "requestId": "req_abc123"
+}
+```
+
+**返回字段说明**
+
+|  字段名   | 描述 |
+| ---|---|
+| ``userId``  | 系统生成的唯一用户 ID  |
+| ``createdAt``  | 账号创建时间（服务端时间）  |
+| ``trialExpiresAt`` | 试用到期时间（未下发则为空） |
+| ``configProfileId`` | 试用配置 ID（未下发则为空）  | 
+| ``nextStep`` |  后续动作，如 ``VERIFY_EMAIL``  |
+| ``requestId`` |  对应请求的 Request Id  |
+
