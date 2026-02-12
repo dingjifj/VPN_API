@@ -99,3 +99,50 @@ sidebar_position: 1
 | ``nextStep`` |  后续动作，如 ``VERIFY_EMAIL``  |
 | ``requestId`` |  对应请求的 Request Id  |
 
+## 5. 错误码说明
+
+**通用错误结构**
+
+```json
+{
+  "code": 42910,
+  "message": "Too many requests",
+  "detail": {
+    "retryAfter": 60,
+    "rule": "ip_rate_limit"
+  },
+  "requestId": "req_abc123"
+}
+```
+
+**错误码列表**
+
+|  HTTP 状态码   |  错误码 | 错误信息 |   场景说明 |
+| ---|---|---|---|
+| **400**  |  40001  | Invalid parameter| 参数校验失败 |
+| **400** | 40002 | Missing gdpr_consent | EU 用户未传 GDPR 同意字段 |  
+| **409**  |  40901  | Email already exists  | 邮箱已注册 |
+| **409** | 40902  | Username already exists  | 用户名冲突|
+| **403** |  40310 |Registration blocked| 命中风控规则  |
+| **403** |  40320 |GDPR consent required|EU 用户未同意 GDPR  |
+| **429** |  42910 |Too many requests| 触发频率限制  |
+| **500** |  50000 |Internal server error| 系统异常  |
+
+## 6. 灰度与版本说明（v2.3）
+
+* `v2.3` 功能默认关闭，通过以下条件开启：
+  * 客户端 Header：``X-Client-Version >= 2.3``
+  * 或服务端用户组白名单
+* 灰度内容包含：
+  * 注册风控规则调整
+  * 试用配置下发策略优化
+
+## 7. 业务处理流程（简要）
+
+1. 基础参数校验
+2. 注册频率与风险规则校验
+3. 区域合规校验（GDPR / 服务可用性）
+4. 创建用户账号
+5. 根据地区与灰度策略：
+   * 下发试用配置（如允许）
+   * 或仅创建账号，不生成配置
