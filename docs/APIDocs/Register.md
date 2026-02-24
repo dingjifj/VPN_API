@@ -121,6 +121,7 @@ sidebar_position: 1
 | ---|---|---|---|
 | **400**  |  40001  | Invalid parameter| 参数校验失败 |
 | **400** | 40002 | Missing gdpr_consent | EU 用户未传 GDPR 同意字段 |  
+| **400** | 40003 | Weak password | 密码强度不足（需包含大小写及数字） |
 | **409**  |  40901  | Email already exists  | 邮箱已注册 |
 | **409** | 40902  | Username already exists  | 用户名冲突|
 | **403** |  40310 |Registration blocked| 命中风控规则  |
