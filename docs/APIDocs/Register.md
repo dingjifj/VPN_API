@@ -2,18 +2,18 @@
 sidebar_position: 1
 ---
 
-# VPN 用户注册接口（Register）
+# VPN 用户注册接口
 
 **服务名**：ClyoxVPN  \
 **接口版本**：v2.3  \
 **维护人**：Auth / Risk Team  \
 **最后更新**：2026-02-05
 
-## 1. 接口概览（Overview）
+## 1. 接口概览
 
 * **Method**：`POST`
 * **Path**：`/api/v2/auth/register`
-* **Content-Type**：`application/json`  
+* **Content-Type**：`application/json`
 * **Rate Limit**：5 次/分钟/IP（防止恶意注册）
   * 5 次 / 分钟 / IP
   * 其他频控策略基于综合风控规则执行（不对外暴露）
@@ -32,7 +32,17 @@ sidebar_position: 1
 
 :::
 
-## 2. 请求头（Headers）
+## 2. 接口特性
+
+* **用途**：创建新账号并初始化试用配置。（成功后返回 `userId` + `trialProfile`）
+
+* **风控**：会根据注册频率/邮箱域名信誉等决定是否放行；被拦截时返回 403/429 并给出可读原因。
+
+* **合规**：EU 账号必须提交 `gdpr_consent=true`，否则 400；部分地区不允许下发试用配置则只创建账号不下发 profile。
+
+* **灰度**：当 `X-Experiment: reg_v23` ，命中 `v2.3` 注册逻辑。
+
+## 3. 请求头
 
 |Header|必填|说明|
 |---|---|---|
@@ -40,7 +50,7 @@ sidebar_position: 1
 |`X-Client-Version`|否|客户端版本号（用于灰度与兼容判断）|
 |`Accept-Language`|否|返回文案语言，默认 `en-US`|
 
-## 3. 请求参数（Body）
+## 4. 请求参数
 
 ```json
 {
@@ -71,7 +81,7 @@ sidebar_position: 1
 * `password` 校验在服务端完成，**客户端不要写死规则**。
 * 是否属于 EU 用户由 **IP Geo + 账单地区** 综合判断。（IP 可能存在误判）
 
-## 4. 成功返回
+## 5. 成功返回
 
 ```json
 {
@@ -99,7 +109,7 @@ sidebar_position: 1
 | ``nextStep`` |  后续动作，如 ``VERIFY_EMAIL``  |
 | ``requestId`` |  对应请求的 Request Id  |
 
-## 5. 错误码说明
+## 6. 错误码说明
 
 **通用错误结构**
 
@@ -120,8 +130,8 @@ sidebar_position: 1
 |  HTTP 状态码   |  错误码 | 错误信息 |   场景说明 |
 | ---|---|---|---|
 | **400**  |  40001  | Invalid parameter| 参数校验失败 |
-| **400** | 40002 | Missing gdpr_consent | EU 用户未传 GDPR 同意字段 |  
-| **400** | 40003 | Weak password | 密码强度不足（需包含大小写及数字） |
+| **400** | 40002 | Missing gdpr_consent | EU 用户未传 GDPR 同意字段 |
+| **400** | 40003 | Weak password | 密码强度不足（需包含大小写及数字） |  
 | **409**  |  40901  | Email already exists  | 邮箱已注册 |
 | **409** | 40902  | Username already exists  | 用户名冲突|
 | **403** |  40310 |Registration blocked| 命中风控规则  |
@@ -129,7 +139,7 @@ sidebar_position: 1
 | **429** |  42910 |Too many requests| 触发频率限制  |
 | **500** |  50000 |Internal server error| 系统异常  |
 
-## 6. 灰度与版本说明（v2.3）
+## 7. 灰度与版本说明（v2.3）
 
 * `v2.3` 功能默认关闭，通过以下条件开启：
   * 客户端 Header：``X-Client-Version >= 2.3``
@@ -138,7 +148,7 @@ sidebar_position: 1
   * 注册风控规则调整
   * 试用配置下发策略优化
 
-## 7. 业务处理流程（简要）
+## 8. 业务处理流程（简要）
 
 1. 基础参数校验
 2. 注册频率与风险规则校验
@@ -147,3 +157,23 @@ sidebar_position: 1
 5. 根据地区与灰度策略：
    * 下发试用配置（如允许）
    * 或仅创建账号，不生成配置
+
+## 9. 注意事项
+
+* 本接口 **不保证一定下发试用配置**，以合规与风控结果为准。
+* 注册失败不会创建任何残留数据。
+* 排查问题请优先提供 ``requestId``。
+* EU 合规规则后续可能扩展字段，客户端需做好兼容。
+
+## 10. 非目标
+
+* 本接口不处理用户登录态校验。
+* 不包含设备管理与多设备策略。
+* 不负责发送注册通知或营销邮件。
+
+## 11. 常见误用与注意事项
+
+* 非 EU 用户无需传递 `gdpr_consent`。
+* `trialExpiresAt = null` 不代表注册失败。
+* 403 错误不建议客户端自动重试。
+* 注册失败不会产生部分用户数据。
